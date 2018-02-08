@@ -36,10 +36,18 @@ head(geno.sample.ids)
 length(geno.sample.ids)
 
 ## Quick QC
-RV <- snpgdsSampMissRate(genofile)
-summary(RV)
-hist(RV, breaks = 30)
-rm(RV)
+sampleMissingRate <- snpgdsSampMissRate(genofile)
+summary(sampleMissingRate)
+hist(sampleMissingRate, breaks = 30)
+rm(sampleMissingRate)
+
+snpRateFreqs <- snpgdsSNPRateFreq(genofile, with.snp.id=TRUE)
+head(data.frame(snpRateFreqs))
+summary(snpRateFreqs$MissingRate)
+hist(snpRateFreqs$MissingRate)
+hist(snpRateFreqs$AlleleFreq)
+hist(snpRateFreqs$AlleleFreq, breaks=__)
+rm(snpRateFreqs)
 # //////////////
 
 ################
