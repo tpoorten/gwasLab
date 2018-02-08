@@ -39,7 +39,6 @@ length(geno.sample.ids)
 RV <- snpgdsSampMissRate(genofile)
 summary(RV)
 hist(RV, breaks = 30)
-rm(RV)
 # //////////////
 
 ################
@@ -49,15 +48,14 @@ IDtab = read.table("phenotype_data/HDRA-G6-4-RDP1-RDP2-NIAS-sativa-only.sample_m
 
 head(sampleInfo)
 head(IDtab)
-sampleInfo$ID = IDtab$__[match(sampleInfo$IID, IDtab$V3)]
-sampleInfo$pop = IDtab$__[match(sampleInfo$IID, IDtab$V3)]
-# subset and sort, based on geno.sample.ids
+sampleInfo$ID = IDtab$V1[match(sampleInfo$IID, IDtab$V3)]
+sampleInfo$pop = IDtab$V6[match(sampleInfo$IID, IDtab$V3)]
 sampleInfo = sampleInfo[match(geno.sample.ids , sampleInfo$ID),]
 sampleInfo = na.omit(sampleInfo)
 
 hist(sampleInfo$AVERAGE_LENGTH)
-hist(sampleInfo$AVERAGE_LENGTH, breaks=__)
-sampleInfo$AVERAGE_LENGTH2 = ifelse(sampleInfo$AVERAGE_LENGTH > __, 1, 0)
+hist(sampleInfo$AVERAGE_LENGTH, breaks=50)
+sampleInfo$AVERAGE_LENGTH2 = ifelse(sampleInfo$AVERAGE_LENGTH > 6, 1, 0)
 
 # reset to ensure that list is updated 
 geno.sample.ids = sampleInfo$ID
@@ -85,9 +83,9 @@ barplot(pc.percentLDP[1:15])
 
 ## PCA plots
 identical(sampleInfo$ID, pcaLDP$sample.id) # check that sample ids match up
-sampleInfo$PC1LDP = pcaLDP$eigenvect[,__]
-sampleInfo$PC2LDP = pcaLDP$eigenvect[,__]
-sampleInfo$PC3LDP = pcaLDP$eigenvect[,__]
+sampleInfo$PC1LDP = pcaLDP$eigenvect[,1]
+sampleInfo$PC2LDP = pcaLDP$eigenvect[,2]
+sampleInfo$PC3LDP = pcaLDP$eigenvect[,3]
 
 ggplot(sampleInfo, aes(PC1LDP,PC2LDP))  + 
   theme_bw() +
@@ -158,13 +156,13 @@ genoData <-  GenotypeData(gds, scanAnnot = scanAnnot)
 genoData
 
 # get positions to filter on
-chrom3start = which(getChromosome(genoData) == __)[1]
-chrom6start = which(getChromosome(genoData) == __)[1]
+chrom3start = which(getChromosome(genoData) == 3)[1]
+chrom6start = which(getChromosome(genoData) == 6)[1]
 
 ####
 ## linear regression
 res <- assocRegression(genoData,
-                       outcome=__,
+                       outcome="AVERAGE_LENGTH",
                        model.type="linear",
                        snpStart = chrom3start, 
                        snpEnd = chrom6start)
@@ -182,7 +180,7 @@ qqPlot(pval=res$Wald.pval, truncate=TRUE, main="QQ Plot of Wald Test p-values")
 res2 <- assocRegression(genoData,
                         outcome="AVERAGE_LENGTH",
                         model.type="linear",
-                        covar=__,
+                        covar=c("pop"),
                         snpStart = chrom3start, 
                         snpEnd = chrom6start)
 
@@ -200,7 +198,7 @@ res3 <- assocRegression(genoData,
                         outcome="AVERAGE_LENGTH",
                         model.type="linear",
                         block.size = 5000,
-                        covar=__,
+                        covar=c("PC1LDP", "PC2LDP", "PC3LDP"),
                         snpStart = chrom3start, 
                         snpEnd = chrom6start)
 
@@ -218,7 +216,7 @@ qqPlot(pval=res3$Wald.pval, truncate=TRUE, main="QQ Plot of Wald Test p-values")
 ##########
 ## logistic regression
 resLogistic <- assocRegression(genoData,
-                               outcome=__,
+                               outcome="AVERAGE_LENGTH2",
                                model.type="logistic",
                                snpStart = chrom3start, 
                                snpEnd = chrom6start)
